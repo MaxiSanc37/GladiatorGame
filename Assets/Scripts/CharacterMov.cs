@@ -2,18 +2,29 @@ using System.Buffers.Text;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 public class CharacterMov : MonoBehaviour
 {
     public float m_Speed = 12f;
-    public float m_TurnSpeed = 180f;
+    public float m_JumpForce = 3f;
+    public float gravity = -9.81f;
+
+    //credit to Brackeys on youtube
+    public CharacterController controller;
+    Vector3 velocity;
+    public Transform groundCheck;
+    public float groundDistance = 0.4f;
+    public LayerMask groundMask;
+    bool isGrounded;
 
     private string m_MovementAxisName;
-    private string m_TurnAxisName;
+    private string m_StrafeAxisName;
+    private string m_JumpAxisName;
     private Rigidbody m_Rigidbody;
     private float m_MovementInputValue;
-    private float m_TurnInputValue;
+    private float m_StrafeInputValue;
 
     private void Awake()
     {
@@ -25,7 +36,7 @@ public class CharacterMov : MonoBehaviour
     {
         m_Rigidbody.isKinematic = false;
         m_MovementInputValue = 0f;
-        m_TurnInputValue = 0f;
+        m_StrafeInputValue = 0f;
     }
 
 
@@ -38,52 +49,67 @@ public class CharacterMov : MonoBehaviour
     private void Start()
     {
         m_MovementAxisName = "Vertical";
-        m_TurnAxisName = "Horizontal";
+        m_StrafeAxisName = "Horizontal";
+        m_JumpAxisName = "Jump";
     }
 
     private void Update()
     {
-        // Store the player's input and make sure the audio for the engine is playing.
+        // Store the player's input.
         m_MovementInputValue = Input.GetAxis(m_MovementAxisName);
-        m_TurnInputValue = Input.GetAxis(m_TurnAxisName);
-
+        m_StrafeInputValue = Input.GetAxis(m_StrafeAxisName);
     }
 
     private void FixedUpdate()
     {
-        // Move and turn the player.
+        // Move the player.
         // Adjust the rigidbodies position and orientation in FixedUpdate. 
         Move();
-        Turn();
+        Jump();
     }
 
-
+    //credits to Brackeys on youtube
     private void Move()
     {
         // Adjust the position of the player based on the player's input.
+        
+        //checks wether the player is on the ground,
+        //turns true when the sphere below the player touches the ground
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
-        // Create a vector in the direction the player is facing with a magnitude 
-        //based on the input, speed and the time between frames.
-        Vector3 movement = transform.forward * m_MovementInputValue * m_Speed *
-        Time.deltaTime;
+        //resets the velocity so that falling isn't instanteneous
+        if(isGrounded && velocity.y < 0)
+        {
+            //limits the slope the player can climb
+            controller.slopeLimit = 45.0f;
+            velocity.y = -2f;
+        }
 
-        // Apply this movement to the rigidbody's position. 
-        m_Rigidbody.MovePosition(m_Rigidbody.position + movement);
+        //movement vector
+        Vector3 move = transform.right * m_StrafeInputValue + transform.forward * m_MovementInputValue;
+
+        //move at a certain speed
+        controller.Move(move * m_Speed * Time.deltaTime);
+
+        //build up velocity depending on gravity
+        velocity.y += gravity * Time.deltaTime;
+
+        //fall with the applied velocity
+        controller.Move(velocity * Time.deltaTime);
     }
 
-
-    private void Turn()
+    private void Jump()
     {
-        // Adjust the rotation of the player based on the player's input.
+        //Adjust the position of the player based on the player's input
 
-        // Determine the number of degrees to be turned based on the input,   
-        //speed and time between frames.
-        float turn = m_TurnInputValue * m_TurnSpeed * Time.deltaTime;
+        //if the player is pressing jump and it's on the ground
+        if (Input.GetButtonDown(m_JumpAxisName) && isGrounded)
+        {
+            //increases the maximum slope that can be climbed
+            controller.slopeLimit = 100.0f;
+            //apply jumping force (sqrt(x * -2 * gravity) is the jump equation)
+            velocity.y = Mathf.Sqrt(m_JumpForce * -2f * gravity);
+        }
 
-        // Make this into a rotation in the y axis. 
-        Quaternion turnRotation = Quaternion.Euler(0f, turn, 0f);
-
-        // Apply this rotation to the rigidbody's rotation. 
-        m_Rigidbody.MoveRotation(m_Rigidbody.rotation * turnRotation);
     }
 }
