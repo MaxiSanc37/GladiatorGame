@@ -58,18 +58,13 @@ public class CharacterMov : MonoBehaviour
         // Store the player's input.
         m_MovementInputValue = Input.GetAxis(m_MovementAxisName);
         m_StrafeInputValue = Input.GetAxis(m_StrafeAxisName);
-    }
-
-    private void FixedUpdate()
-    {
         // Move the player.
         // Adjust the rigidbodies position and orientation in FixedUpdate. 
-        Move();
-        Jump();
+        MoveJump();
     }
 
     //credits to Brackeys on youtube
-    private void Move()
+    private void MoveJump()
     {
         // Adjust the position of the player based on the player's input.
         
@@ -96,11 +91,6 @@ public class CharacterMov : MonoBehaviour
 
         //fall with the applied velocity
         controller.Move(velocity * Time.deltaTime);
-    }
-
-    private void Jump()
-    {
-        //Adjust the position of the player based on the player's input
 
         //if the player is pressing jump and it's on the ground
         if (Input.GetButtonDown(m_JumpAxisName) && isGrounded)
@@ -110,6 +100,5 @@ public class CharacterMov : MonoBehaviour
             //apply jumping force (sqrt(x * -2 * gravity) is the jump equation)
             velocity.y = Mathf.Sqrt(m_JumpForce * -2f * gravity);
         }
-
     }
 }

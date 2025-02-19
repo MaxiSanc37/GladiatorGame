@@ -6,11 +6,15 @@ public class CameraMovement : MonoBehaviour
 {
     public float m_MouseSens = 100f;
     float xRotation = 0f;
+    float yRotation = 0f;
 
     private string m_MouseXName;
     private string m_MouseYName;
     private float m_MouseXVal;
     private float m_MouseYVal;
+
+    private float rotateSpeed = 4f;
+    private float maxTurn = 3f;
 
     public Transform playerBody;
 
@@ -31,11 +35,8 @@ public class CameraMovement : MonoBehaviour
         //get both mouse x and y values
         m_MouseXVal = Input.GetAxis(m_MouseXName);
         m_MouseYVal = Input.GetAxis(m_MouseYName);
-    }
-    private void FixedUpdate()
-    {
         // Move the camera.
-        // Adjust the rigidbodies position and orientation in FixedUpdate. 
+        // Adjust the rigidbodies position and orientation in Update. 
         CameraMove();
     }
 
@@ -48,12 +49,13 @@ public class CameraMovement : MonoBehaviour
 
         //set rotation decrease criteria and limit the rotation so you can't look behind
         xRotation -= mouseYMov;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+        xRotation = Mathf.Clamp(xRotation, -60f, 50f);
 
         //Quaternion of x rotation
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         //rotate the body
         playerBody.Rotate(Vector3.up * mouseXMov);
+        //playerBody.Rotate(Vector3.right * mouseYMov); --> makes it rotate everywhere(because camera is attached?)
         //m_Rigidbody.MoveRotation(m_Rigidbody.rotation * playerRotation);
     }
 }
