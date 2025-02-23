@@ -55,7 +55,7 @@ public class CameraMovement : MonoBehaviour
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         //rotate the body
         playerBody.Rotate(Vector3.up * mouseXMov);
-        //playerBody.Rotate(Vector3.right * mouseYMov); --> makes it rotate everywhere(because camera is attached?)
+        //playerBody.Rotate(Vector3.right * mouseYMov); //--> makes it rotate everywhere(because camera is attached?)
         //m_Rigidbody.MoveRotation(m_Rigidbody.rotation * playerRotation);
     }
 }
