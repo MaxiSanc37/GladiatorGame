@@ -6,15 +6,14 @@ public class CameraMovement : MonoBehaviour
 {
     public float m_MouseSens = 100f;
     float xRotation = 0f;
-    float yRotation = 0f;
 
     private string m_MouseXName;
     private string m_MouseYName;
     private float m_MouseXVal;
     private float m_MouseYVal;
 
-    private float rotateSpeed = 4f;
-    private float maxTurn = 3f;
+    //private float rotateSpeed = 4f;
+    //private float maxTurn = 3f;
 
     public Transform playerBody;
 
