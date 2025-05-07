@@ -42,7 +42,8 @@ public class Actor : MonoBehaviour
 
         // PLAY THE ANIMATION //
         currentAnimationState = newState;
-        animator.CrossFadeInFixedTime(currentAnimationState, 0.2f);
+        //fades into any other animation with a timed transition
+        animator.CrossFadeInFixedTime(currentAnimationState, 0.35f);
     }
 
     void SetAnimations()
@@ -60,7 +61,8 @@ public class Actor : MonoBehaviour
 
         hit = true;
 
-        Invoke(nameof(ResetHit), 1f);
+        //mess with the second float to shorten the hit animation duration
+        Invoke(nameof(ResetHit), 0.5f);
         ChangeAnimationState(HIT);
     }
 

@@ -9,9 +9,12 @@ using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Statistics")]
     public float m_Speed = 12f;
     public float m_JumpForce = 3f;
     public float gravity = -9.81f;
+    public float health = 100f;
+    public float maxHealth = 100f;
 
     //credit to Brackeys and Pogle on youtube
     public CharacterController controller;
@@ -35,6 +38,10 @@ public class PlayerController : MonoBehaviour
     private Rigidbody m_Rigidbody;
     private float m_MovementInputValue;
     private float m_StrafeInputValue;
+
+    [SerializeField] private HealthUI healthBar;
+
+    GameController GC;
 
     private void Awake()
     {
@@ -122,6 +129,8 @@ public class PlayerController : MonoBehaviour
         m_StrafeAxisName = "Horizontal";
         m_JumpAxisName = "Jump";
         animator.speed = animationSpeed;
+        healthBar.SetMaxHealth(maxHealth);
+        GC = GameObject.Find("Controller").GetComponent<GameController>();
     }
 
     private void Update()
@@ -234,6 +243,26 @@ public class PlayerController : MonoBehaviour
             controller.slopeLimit = 100.0f;
             //apply jumping force (sqrt(x * -2 * gravity) is the jump equation)
             velocity.y = Mathf.Sqrt(m_JumpForce * -2f * gravity);
+        }
+    }
+
+    // ------------------- //
+    // STATISTICS BEHAVIOUR //
+    // ------------------- //
+
+    public void SetHealth(float healthChange)
+    {
+        //changes the current health
+        health += healthChange;
+        //makes sure that the health change is legal (> 0 and < maxHealth)
+        health = Mathf.Clamp(health,0, maxHealth);
+        
+        //set the health in health bar UI
+        healthBar.SetHealth(health);
+
+        if (health <= 0)
+        {
+            GC.GameOver();
         }
     }
 }

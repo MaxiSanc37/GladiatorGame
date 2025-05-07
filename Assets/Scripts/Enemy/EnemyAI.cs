@@ -12,6 +12,11 @@ public class EnemyAI : MonoBehaviour
 
     [SerializeField] LayerMask groundLayer, playerLayer;
 
+    Animator animator;
+    public float animationSpeed = 1.0f;
+
+    BoxCollider weaponCollider;
+
     //patrol
     Vector3 destPoint;
     bool walkpointSet;
@@ -22,11 +27,16 @@ public class EnemyAI : MonoBehaviour
     bool playerInSight;
     bool playerInAttackRange;
 
+    public float damage = 10f;
+    bool hit = false;
+
     // Start is called before the first frame update
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.Find("Player");
+        animator = GetComponent<Animator>();
+        weaponCollider = GetComponentInChildren<BoxCollider>();
     }
 
     // Update is called once per frame
@@ -35,16 +45,19 @@ public class EnemyAI : MonoBehaviour
         playerInSight = Physics.CheckSphere(transform.position, sightRange, playerLayer);
         playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, playerLayer);
 
+        //Patrol when the player is not in sight and in the attack range
         if (!playerInSight && !playerInAttackRange)
         {
             Patrol();
         }
 
+        //Chase when the player is in sight but not in the attack range
         if (playerInSight && !playerInAttackRange)
         {
             Chase();
         }
         
+        //Attack when player is in the attack range
         if (playerInAttackRange)
         {
             Attack();
@@ -53,12 +66,21 @@ public class EnemyAI : MonoBehaviour
 
     void Chase()
     {
+        //make the enemy target and follow the player
         agent.SetDestination(player.transform.position);
     }
 
     void Attack()
     {
-
+        //checks that the attack animation is not the one currently playing
+        if (!animator.GetCurrentAnimatorStateInfo(0).IsName("Enemy Attack"))
+        {
+            //triggers the attack animation
+            animator.speed = animationSpeed;
+            animator.SetTrigger("Attack");
+            //makes the agent stop walking when it attacks
+            agent.SetDestination(transform.position);
+        }
     }
 
     void Patrol()
@@ -69,8 +91,8 @@ public class EnemyAI : MonoBehaviour
             //search for a destination to go to
             SearchForDest();
         }
-        //if there's a set walking point
-        if (walkpointSet)
+        //if there's a set walking point and that the attackins animation isn't playing
+        if (walkpointSet && !animator.GetCurrentAnimatorStateInfo(0).IsName("Enemy Attack"))
         {
             //send the agent to the destination point
             agent.SetDestination(destPoint);
@@ -98,5 +120,37 @@ public class EnemyAI : MonoBehaviour
             //point can now be walked to
             walkpointSet = true;
         }
+    }
+
+    void EnableAttack()
+    {
+        //enables the weapon collider to attack
+        weaponCollider.enabled = true;
+    }
+
+    void DisableAttack()
+    {
+        //disables the weapon collider to walk
+        weaponCollider.enabled = false;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        //variable that checks whether the collided game object is the player
+        var player = other.GetComponent<PlayerController>();
+
+        //if it is the player
+        if (player != null && hit == false)
+        {
+            //lower player's hp by the enemies damage
+            player.SetHealth(-damage);
+            DisableAttack();
+            hit = true;
+        }
+        else
+        {
+            hit = false;
+        }
+        
     }
 }
