@@ -9,13 +9,14 @@ public class EnemyAI : MonoBehaviour
 {
     GameObject player;
     NavMeshAgent agent;
+    Actor enem;
 
     [SerializeField] LayerMask groundLayer, playerLayer;
 
     Animator animator;
     public float animationSpeed = 1.0f;
 
-    BoxCollider weaponCollider;
+    [SerializeField] BoxCollider weaponCollider;
 
     //patrol
     Vector3 destPoint;
@@ -28,7 +29,8 @@ public class EnemyAI : MonoBehaviour
     bool playerInAttackRange;
 
     public float damage = 10f;
-    bool hit = false;
+
+    private bool disabledAfterDeath = false;
 
     // Start is called before the first frame update
     void Start()
@@ -36,12 +38,30 @@ public class EnemyAI : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.Find("Player");
         animator = GetComponent<Animator>();
-        weaponCollider = GetComponentInChildren<BoxCollider>();
+        enem = GetComponent<Actor>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        //checks that the enemy is dead
+        if (enem.dead)
+        {
+            // Deactivate once
+            if (!disabledAfterDeath)
+            {
+                DisableAttack();
+
+                // turn off agent
+                if (agent.enabled)
+                    agent.enabled = false;
+
+                disabledAfterDeath = true;
+            }
+
+            return; //turns off AI logic
+        }
+
         playerInSight = Physics.CheckSphere(transform.position, sightRange, playerLayer);
         playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, playerLayer);
 
@@ -80,6 +100,7 @@ public class EnemyAI : MonoBehaviour
             animator.SetTrigger("Attack");
             //makes the agent stop walking when it attacks
             agent.SetDestination(transform.position);
+            agent.transform.rotation.Equals(player);
         }
     }
 
@@ -122,35 +143,15 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    void EnableAttack()
+    public void EnableAttack()
     {
         //enables the weapon collider to attack
         weaponCollider.enabled = true;
     }
 
-    void DisableAttack()
+    public void DisableAttack()
     {
         //disables the weapon collider to walk
         weaponCollider.enabled = false;
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        //variable that checks whether the collided game object is the player
-        var player = other.GetComponent<PlayerController>();
-
-        //if it is the player
-        if (player != null && hit == false)
-        {
-            //lower player's hp by the enemies damage
-            player.SetHealth(-damage);
-            DisableAttack();
-            hit = true;
-        }
-        else
-        {
-            hit = false;
-        }
-        
     }
 }

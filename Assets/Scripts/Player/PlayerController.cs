@@ -3,9 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
 using UnityEngine.Windows;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
+using UnityEngine.UI;
+using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
@@ -15,6 +16,16 @@ public class PlayerController : MonoBehaviour
     public float gravity = -9.81f;
     public float health = 100f;
     public float maxHealth = 100f;
+
+    [Header("Stamina")]
+    public float maxStamina = 100f;
+    public float stamina;
+    public float staminaDrainRate = 20f;
+    public float staminaRegenRate = 10f;
+    public Slider staminaBar;
+    public bool isRunning;
+
+    public TMP_Text staminaText;
 
     //credit to Brackeys and Pogle on youtube
     public CharacterController controller;
@@ -131,6 +142,10 @@ public class PlayerController : MonoBehaviour
         animator.speed = animationSpeed;
         healthBar.SetMaxHealth(maxHealth);
         GC = GameObject.Find("Controller").GetComponent<GameController>();
+        //stamina configs
+        stamina = maxStamina;
+        staminaBar.maxValue = maxStamina;
+        staminaBar.value = maxStamina;
     }
 
     private void Update()
@@ -150,6 +165,30 @@ public class PlayerController : MonoBehaviour
         }
 
         SetAnimations();
+
+        Running();
+    }
+
+    public void Running()
+    {
+        if (UnityEngine.Input.GetKey(KeyCode.LeftShift) && stamina > 0)
+        {
+            isRunning = true;
+            m_Speed = 20f; // running speed
+            stamina -= staminaDrainRate * Time.deltaTime;
+        }
+        else
+        {
+            isRunning = false;
+            m_Speed = 12f; // normal speed
+            stamina += staminaRegenRate * Time.deltaTime;
+        }
+
+        // Clamp the stamina and update the UI
+        stamina = Mathf.Clamp(stamina, 0, maxStamina);
+        staminaBar.value = stamina;
+        staminaText.text = Mathf.RoundToInt(stamina).ToString();
+
     }
 
     //Attack Code
