@@ -77,6 +77,13 @@ public class Actor : MonoBehaviour
 
         hit = true;
 
+        // Cancel current attack if it's an archer
+        IEnemyAI ai = GetComponent<IEnemyAI>();
+        if (ai is EnemyArcherAI archerAI)
+        {
+            archerAI.CancelShot();
+        }
+
         //mess with the second float to shorten the hit animation duration
         Invoke(nameof(ResetHit), 0.5f);
         ChangeAnimationState(HIT);
@@ -104,7 +111,11 @@ public class Actor : MonoBehaviour
     //activates the ragdoll
     void ActivateRagdoll()
     {
-        this.GetComponent<EnemyAI>().DisableAttack();
+        IEnemyAI ai = GetComponent<IEnemyAI>();
+        if (ai != null)
+        {
+            ai.DisableAttack();
+        }
 
         foreach (var rb in ragdollBodies)
         {
@@ -202,6 +213,20 @@ public class Actor : MonoBehaviour
         {
             //removes enemy from the spawner
             spawner.currEnemies.Remove(this.gameObject);
+        }
+
+        // Give coins to the player when enemy dies
+        var player = GameObject.FindWithTag("Player").GetComponent<PlayerController>();
+        var waveSystem = spawner; // spawner ya lo tenés asignado
+
+        if (player != null && waveSystem != null)
+        {
+            int baseReward = 10; // initial coin drop per enemy
+            int waveIndex = waveSystem.GetCurrentWaveIndex();
+            float multiplier = 1f + waveIndex * 0.15f; // how many more coins you get every new round
+            int reward = Mathf.RoundToInt(baseReward * multiplier);
+            player.coins += reward;
+            player.UpdateCoinsUI();
         }
 
         Invoke(nameof(Despawn), 20f);

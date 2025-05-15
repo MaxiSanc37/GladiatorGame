@@ -16,6 +16,10 @@ public class PlayerController : MonoBehaviour
     public float gravity = -9.81f;
     public float health = 100f;
     public float maxHealth = 100f;
+    public float healthRegen = 0f;
+    public int coins = 0;
+
+    public TMP_Text coinText;
 
     [Header("Stamina")]
     public float maxStamina = 100f;
@@ -24,6 +28,10 @@ public class PlayerController : MonoBehaviour
     public float staminaRegenRate = 10f;
     public Slider staminaBar;
     public bool isRunning;
+    private bool isRunCooldown = false;
+    public float runCooldownDuration = 1.5f;
+    private float runCooldownTimer = 0f;
+
 
     public TMP_Text staminaText;
 
@@ -171,24 +179,53 @@ public class PlayerController : MonoBehaviour
 
     public void Running()
     {
-        if (UnityEngine.Input.GetKey(KeyCode.LeftShift) && stamina > 0)
+        bool isMoving = Mathf.Abs(m_MovementInputValue) > 0.1f || Mathf.Abs(m_StrafeInputValue) > 0.1f;
+        bool shiftHeld = UnityEngine.Input.GetKey(KeyCode.LeftShift);
+
+        // Running logic
+        if (shiftHeld && isMoving && stamina > 0f)
         {
             isRunning = true;
-            m_Speed = 20f; // running speed
+            m_Speed = 20f;
             stamina -= staminaDrainRate * Time.deltaTime;
+
+            // Trigger regeneration cooldown if stamina hits zero
+            if (stamina <= 0f)
+            {
+                isRunCooldown = true;
+                runCooldownTimer = runCooldownDuration;
+            }
         }
         else
         {
             isRunning = false;
-            m_Speed = 12f; // normal speed
-            stamina += staminaRegenRate * Time.deltaTime;
+            m_Speed = 12f;
+
+            // Cooldown timer before stamina starts regenerating
+            if (isRunCooldown)
+            {
+                runCooldownTimer -= Time.deltaTime;
+                if (runCooldownTimer <= 0f)
+                {
+                    isRunCooldown = false;
+                }
+            }
+            else
+            {
+                stamina += staminaRegenRate * Time.deltaTime;
+            }
         }
 
-        // Clamp the stamina and update the UI
+        // Clamp and update UI
         stamina = Mathf.Clamp(stamina, 0, maxStamina);
         staminaBar.value = stamina;
         staminaText.text = Mathf.RoundToInt(stamina).ToString();
+    }
 
+    public void UpdateCoinsUI()
+    {
+        if (coinText != null)
+            coinText.text = coins.ToString();
     }
 
     //Attack Code

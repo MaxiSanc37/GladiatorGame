@@ -106,4 +106,9 @@ public class WaveSystem : MonoBehaviour
             return FindSpawnPos();
         }
     }
+
+    public int GetCurrentWaveIndex()
+    {
+        return currentWave;
+    }
 }

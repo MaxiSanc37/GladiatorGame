@@ -5,7 +5,7 @@ using UnityEngine.AI;
 
 //Credits to The Game Dev Cave for the code
 
-public class EnemyAI : MonoBehaviour
+public class EnemyAI : MonoBehaviour, IEnemyAI
 {
     GameObject player;
     NavMeshAgent agent;
@@ -127,18 +127,17 @@ public class EnemyAI : MonoBehaviour
 
     void SearchForDest()
     {
-        //random z value for the new destination
-        float z = Random.Range(-range, range);
-        //random x value for the new destination
+        // Random X and Z within range
         float x = Random.Range(-range, range);
+        float z = Random.Range(-range, range);
 
-        //destination point for the agent
-        destPoint = new Vector3(transform.position.x + x, transform.position.y, transform.position.z + z);
+        // Set origin at a height to make sure raycast reaches ground
+        Vector3 randomPoint = new Vector3(transform.position.x + x, transform.position.y + 10f, transform.position.z + z);
 
-        //checks whether the dest point is valid through a raycast that verifies if the hit point is part of the groundLayer
-        if (Physics.Raycast(destPoint, Vector3.down, groundLayer))
+        // Cast ray downwards to find ground
+        if (Physics.Raycast(randomPoint, Vector3.down, out RaycastHit hit, 20f, groundLayer))
         {
-            //point can now be walked to
+            destPoint = hit.point; // Set point on ground
             walkpointSet = true;
         }
     }
