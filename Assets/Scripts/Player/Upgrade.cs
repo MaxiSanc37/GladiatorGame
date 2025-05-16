@@ -27,7 +27,10 @@ public class Upgrade : MonoBehaviour
             case UpgradeType.Damage:
                 playerStats.attackDamage *= upgrade.value; break; // --> atk damage upgrade
             case UpgradeType.MaxHealth:
-                playerStats.maxHealth += upgrade.value; playerStats.SetHealth(upgrade.value); break; // --> max health upgrade (also heals you by the amount changing the HealthBar UI)
+                playerStats.maxHealth += upgrade.value; playerStats.SetHealth(upgrade.value);
+                playerStats.healthUI.SetMaxHealth(playerStats.maxHealth); // Update HealthUI
+                playerStats.healthUI.SetHealth(playerStats.health);
+                break; // --> max health upgrade (also heals you by the amount changing the HealthBar UI)
             case UpgradeType.MaxStamina:
                 playerStats.maxStamina += upgrade.value; // --> max stamina upgrade
                 playerStats.staminaBar.maxValue = playerStats.maxStamina; // --> update max value for staminaBar

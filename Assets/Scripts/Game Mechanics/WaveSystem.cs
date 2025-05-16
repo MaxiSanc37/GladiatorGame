@@ -33,7 +33,7 @@ public class WaveSystem : MonoBehaviour
 
     public UpgradeManager upgradeManager;
 
-    public int finalWaveIndex = 5;
+    public int finalWaveIndex = 4;
     public GameObject victoryScreen;
 
     // Start is called before the first frame update

@@ -21,6 +21,8 @@ public class PlayerController : MonoBehaviour
     public float healthRegen = 0f;
     public int coins = 0;
 
+    public HealthUI healthUI;
+
     public TMP_Text coinText;
 
     [Header("Stamina")]
@@ -254,7 +256,7 @@ public class PlayerController : MonoBehaviour
         // Clamp and update UI
         stamina = Mathf.Clamp(stamina, 0, maxStamina);
         staminaBar.value = stamina;
-        staminaText.text = Mathf.RoundToInt(stamina).ToString();
+        staminaText.text = $"{Mathf.RoundToInt(stamina)} / {Mathf.RoundToInt(maxStamina)}";
     }
 
     public void UpdateCoinsUI()

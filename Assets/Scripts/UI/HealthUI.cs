@@ -54,7 +54,7 @@ public class HealthUI : MonoBehaviour
         float newWidth = normalizedHealth * originalWidth;
         healthBar.sizeDelta = new Vector2(newWidth, healthBar.sizeDelta.y);
 
-        healthText.text = Mathf.RoundToInt(health).ToString();
+        healthText.text = $"{Mathf.RoundToInt(health)} / {Mathf.RoundToInt(maxHealth)}";
     }
 
 }
