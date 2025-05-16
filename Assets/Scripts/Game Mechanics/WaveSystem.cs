@@ -61,6 +61,8 @@ public class WaveSystem : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
 
+        currentWave++;
+
         //Checks if it is the final wave
         if (currentWave >= finalWaveIndex)
         {
@@ -71,7 +73,6 @@ public class WaveSystem : MonoBehaviour
         upgradeManager.ShowRandomUpgrades(3);
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
-        currentWave++;
         SpawnWave();
         waveCleared = false;
     }

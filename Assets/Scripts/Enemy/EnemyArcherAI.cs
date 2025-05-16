@@ -51,6 +51,7 @@ public class EnemyArcherAI : MonoBehaviour, IEnemyAI
         animator = GetComponent<Animator>();
         actor = GetComponent<Actor>();
         cooldownTimer = attackCooldown;
+        agent.autoRepath = true;
     }
 
     void Update()
@@ -155,7 +156,7 @@ public class EnemyArcherAI : MonoBehaviour, IEnemyAI
             animator.SetFloat("Speed", 1f); // walking animation
         }
 
-        if (Vector3.Distance(transform.position, destPoint) < 2f)
+        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
         {
             walkpointSet = false;
         }
