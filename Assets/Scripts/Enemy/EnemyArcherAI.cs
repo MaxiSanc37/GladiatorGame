@@ -76,6 +76,13 @@ public class EnemyArcherAI : MonoBehaviour, IEnemyAI
             return;
         }
 
+        if (player == null)
+        {
+            GameObject p = GameObject.FindWithTag("Player");
+            if (p != null) player = p;
+            return; // Wait till it's assigned
+        }
+
         playerInSight = Physics.CheckSphere(transform.position, sightRange, playerLayer);
 
         // Prevent walking if about to shoot
@@ -86,16 +93,14 @@ public class EnemyArcherAI : MonoBehaviour, IEnemyAI
         }
 
         // If player is no longer in sight but the archer is mid-attack animation, cancel it
-        if (!playerInSight && (isShooting || animator.GetCurrentAnimatorStateInfo(0).IsName("Attack")))
+        if (!playerInSight && (isShooting || currentArrow != null || animator.GetCurrentAnimatorStateInfo(0).IsName("Attack")))
         {
-            isShooting = false;
-            animator.ResetTrigger("Attack");
-            animator.SetBool("isAiming", false);
             CancelShot();
         }
 
         if (!playerInSight && !isShooting && !animator.GetCurrentAnimatorStateInfo(0).IsName("Attack"))
         {
+            CancelShot();
             animator.SetFloat("Speed", 1f);
         }
 
@@ -172,6 +177,8 @@ public class EnemyArcherAI : MonoBehaviour, IEnemyAI
 
     void Attack()
     {
+        if (arrowPrefab == null || firePoint == null) return;
+
         if (isShooting || animator.GetCurrentAnimatorStateInfo(0).IsName("Attack")) return;
 
         // Always stop movement and look at player
@@ -212,6 +219,7 @@ public class EnemyArcherAI : MonoBehaviour, IEnemyAI
 
         animator.ResetTrigger("Attack");
         animator.SetTrigger("AttackOver");
+        animator.SetBool("isAiming", false);
     }
 
     public void PrepareArrow()
@@ -220,13 +228,22 @@ public class EnemyArcherAI : MonoBehaviour, IEnemyAI
         if (arrowPrefab && firePoint)
         {
             currentArrow = Instantiate(arrowPrefab, firePoint.position, firePoint.rotation, firePoint);
+            currentArrow.GetComponent<Arrow>().EnableTimeout(); // enables timeout in case arrow is stuck
+
         }
     }
 
     public void Shoot()
     {
         // Cancel shot if player is no longer in sight
-        if (!playerInSight) return;
+        if (!playerInSight)
+        {
+            CancelShot();
+            return;
+        }
+
+        // No arrow to shoot
+        if (currentArrow == null) return;
 
         // Called when archer releases the arrow
         if (currentArrow != null)

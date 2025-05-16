@@ -17,16 +17,37 @@ public class HealthUI : MonoBehaviour
 
     [SerializeField] private RectTransform healthBar;
 
+    private float originalWidth;
+
     public void Start()
     {
-        //provide the initial health
-        healthText.text = player.GetComponent<PlayerController>().health.ToString();
+        width = healthBar.sizeDelta.x;
+        height = healthBar.sizeDelta.y;
+
+        if (player.TryGetComponent<PlayerController>(out var pc))
+        {
+            maxHealth = pc.maxHealth;
+            health = pc.health;
+
+            SetMaxHealth(maxHealth);
+            SetHealth(health);
+        }
     }
-    public void SetMaxHealth(float maxHealthParam)
+
+    public void SetMaxHealth(float newValue)
     {
-        //sets the maxHealth
-        maxHealth = maxHealthParam;
+        maxHealth = newValue;
+
+        if (health > maxHealth)
+            health = maxHealth;
+
+        // Recalculate width
+        width = GetComponent<RectTransform>().sizeDelta.x;
+
+        SetHealth(health); // Redraw
     }
+
+
     public void SetHealth(float healthParam)
     {
         health = healthParam;

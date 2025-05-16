@@ -12,6 +12,24 @@ public class Arrow : MonoBehaviour
 
     private GameObject shooter;
 
+    private float idleTimer = 0f;
+    private bool allowTimeout = false;
+
+    public void EnableTimeout()
+    {
+        allowTimeout = true;
+    }
+
+    void Update()
+    {
+        if (allowTimeout && !hasBeenFired)
+        {
+            idleTimer += Time.deltaTime;
+            if (idleTimer > 4f)
+                Destroy(gameObject);
+        }
+    }
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();

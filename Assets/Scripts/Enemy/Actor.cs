@@ -13,8 +13,8 @@ using UnityEngine.AI;
 public class Actor : MonoBehaviour
 {
     //current actor health and max health
-    int currentHealth;
-    public int maxHealth;
+    float currentHealth;
+    public float maxHealth;
     Animator animator;
     private Rigidbody m_Rigidbody;
 
@@ -96,7 +96,7 @@ public class Actor : MonoBehaviour
     }
 
     //code for taking damage
-    public void TakeDamage(int amount)
+    public void TakeDamage(float amount)
     {
         currentHealth -= amount;
 
@@ -221,7 +221,7 @@ public class Actor : MonoBehaviour
 
         if (player != null && waveSystem != null)
         {
-            int baseReward = 10; // initial coin drop per enemy
+            int baseReward = 20; // initial coin drop per enemy
             int waveIndex = waveSystem.GetCurrentWaveIndex();
             float multiplier = 1f + waveIndex * 0.15f; // how many more coins you get every new round
             int reward = Mathf.RoundToInt(baseReward * multiplier);

@@ -27,8 +27,11 @@ public class WaveSystem : MonoBehaviour
     int currentWave = 0;
     public float spawnRange = 200f;
     public List<GameObject> currEnemies;
+    private bool waveCleared = false;
 
     public TMP_Text waveCounterText;
+
+    public UpgradeManager upgradeManager;
 
     // Start is called before the first frame update
     void Start()
@@ -43,11 +46,23 @@ public class WaveSystem : MonoBehaviour
     {
         /*checks if the enemies killed are greater than or equal the number of
         enemies in the current wave*/
-        if (currEnemies.Count == 0)
+        if (!waveCleared && currEnemies.Count == 0)
         {
-            currentWave++;
-            SpawnWave();
+            waveCleared = true;
+            StartCoroutine(HandleEndOfWave());
         }
+    }
+
+    //Gives a small delay for the enemy to die in order to show the upgrade menu.
+    private IEnumerator HandleEndOfWave()
+    {
+        yield return new WaitForSeconds(1f);
+        upgradeManager.ShowRandomUpgrades(3);
+        Time.timeScale = 0f;
+        Cursor.lockState = CursorLockMode.None;
+        currentWave++;
+        SpawnWave();
+        waveCleared = false;
     }
 
     //spawns a wave of enemies

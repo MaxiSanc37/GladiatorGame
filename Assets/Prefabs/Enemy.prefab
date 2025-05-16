@@ -1233,8 +1233,8 @@ MonoBehaviour:
   animationSpeed: 1.5
   weaponCollider: {fileID: 2992129493086917051}
   range: 30
-  sightRange: 60
-  attackRange: 5
+  sightRange: 80
+  attackRange: 6
   damage: 10
 --- !u!195 &8539268668448577434
 NavMeshAgent:

@@ -740,7 +740,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 2097152
   animationSpeed: 1
-  sightRange: 60
+  sightRange: 80
   patrolRange: 30
   arrowPrefab: {fileID: 3144267434724502026, guid: 3c50180e42571944d9c13c885d22773d, type: 3}
   firePoint: {fileID: 2399131321677801393}

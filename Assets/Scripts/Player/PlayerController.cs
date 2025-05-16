@@ -11,7 +11,9 @@ using TMPro;
 public class PlayerController : MonoBehaviour
 {
     [Header("Statistics")]
-    public float m_Speed = 12f;
+    public float m_Speed = 10f;
+    public float baseSpeed = 10f;
+    public float runSpeedBonus = 6f;
     public float m_JumpForce = 3f;
     public float gravity = -9.81f;
     public float health = 100f;
@@ -107,18 +109,16 @@ public class PlayerController : MonoBehaviour
 
         // PLAY THE ANIMATION //
         currentAnimationState = newState;
-        animator.speed = animationSpeed; // change speed for attack animation
-        animator.CrossFadeInFixedTime(currentAnimationState, 0.2f);
+        animator.speed = attackSpeed; // change speed for attack animation
+        animator.CrossFadeInFixedTime(currentAnimationState, 0.3f);
     }
 
     void SetAnimations()
     {
-        // If player is not attacking
-        if (!attacking)
+        if (!attacking && currentAnimationState != IDLE && !animator.GetCurrentAnimatorStateInfo(0).IsName(IDLE))
         {
-            animator.speed = 1; //set speed back to normal
-            ChangeAnimationState(IDLE); // change to idle
-           
+            animator.speed = 1f;
+            ChangeAnimationState(IDLE);
         }
     }
 
@@ -127,10 +127,11 @@ public class PlayerController : MonoBehaviour
     // ------------------- //
 
     [Header("Attacking")] //--> attacking params
+    public float baseAttackDuration = 1f;  // original animation time
+    public float baseAttackDelay = 0.42f;   // striking point
     public float attackDistance = 3f;
-    public float attackDelay = 0.4f;
     public float attackSpeed = 1f;
-    public int attackDamage = 1;
+    public float attackDamage = 10f;
     public LayerMask attackLayer;
 
     public GameObject hitEffect;
@@ -175,6 +176,12 @@ public class PlayerController : MonoBehaviour
         SetAnimations();
 
         Running();
+
+        // Health regen
+        if (health < maxHealth && healthRegen > 0)
+        {
+            SetHealth(healthRegen * Time.deltaTime);
+        }
     }
 
     public void Running()
@@ -186,7 +193,7 @@ public class PlayerController : MonoBehaviour
         if (shiftHeld && isMoving && stamina > 0f)
         {
             isRunning = true;
-            m_Speed = 20f;
+            m_Speed = baseSpeed + runSpeedBonus;
             stamina -= staminaDrainRate * Time.deltaTime;
 
             // Trigger regeneration cooldown if stamina hits zero
@@ -199,7 +206,7 @@ public class PlayerController : MonoBehaviour
         else
         {
             isRunning = false;
-            m_Speed = 12f;
+            m_Speed = baseSpeed;
 
             // Cooldown timer before stamina starts regenerating
             if (isRunCooldown)
@@ -236,11 +243,15 @@ public class PlayerController : MonoBehaviour
         readyToAttack = false;
         attacking = true;
 
-        Invoke(nameof(ResetAttack), attackSpeed);
-        Invoke(nameof(AttackRaycast), attackDelay);
-        
-        ChangeAnimationState(ATTACK1);
-        //combo for two attack animations
+        // Changes the animation speed
+        animator.speed = attackSpeed;
+
+        float duration = baseAttackDuration / attackSpeed;
+        float delay = baseAttackDelay / attackSpeed;
+
+        StartCoroutine(HandleAttack(duration, delay));
+
+        // Alternate between animations
         if (attackCount == 0)
         {
             ChangeAnimationState(ATTACK1);
@@ -253,11 +264,21 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private IEnumerator HandleAttack(float duration, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        AttackRaycast();
+
+        yield return new WaitForSeconds(duration - delay - 0.02f); // buffer
+        ResetAttack();
+    }
+
     //resets the attacking conditions
-    void ResetAttack()
+    private void ResetAttack()
     {
         attacking = false;
         readyToAttack = true;
+        animator.speed = 1f; // for other animations to play normally
     }
 
     void AttackRaycast()
