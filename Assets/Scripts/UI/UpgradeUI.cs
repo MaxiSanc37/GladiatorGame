@@ -40,6 +40,6 @@ public class UpgradeUI : MonoBehaviour
 
         upgrade.playerStats = player; // Assign player to upgrade object
         upgrade.ApplyUpgrade(upgrade);
-
+        upgradeManager.PlayCoinSound(); // Coin sound when purchasing
     }
 }

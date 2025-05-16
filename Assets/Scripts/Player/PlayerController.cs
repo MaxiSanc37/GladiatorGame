@@ -34,8 +34,21 @@ public class PlayerController : MonoBehaviour
     public float runCooldownDuration = 1.5f;
     private float runCooldownTimer = 0f;
 
-
     public TMP_Text staminaText;
+
+    [Header("Audio")]
+    public AudioSource audioSource;
+
+    public AudioClip[] footstepClips;
+    public AudioClip[] hitEnemyClips;
+    public AudioClip[] missClips;
+    public AudioClip[] hurtClips;
+
+    private int lastHurtIndex = -1;
+    private float footstepTimer;
+    public float stepInterval = 0.5f;
+    private int lastHitIndex = -1;
+    private int lastMissIndex = -1;
 
     //credit to Brackeys and Pogle on youtube
     public CharacterController controller;
@@ -223,6 +236,21 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        if (isMoving && isGrounded)
+        {
+            footstepTimer += Time.deltaTime;
+
+            if (footstepTimer >= stepInterval)
+            {
+                PlayFootstep();
+                footstepTimer = 0f;
+            }
+        }
+        else
+        {
+            footstepTimer = stepInterval;
+        }
+
         // Clamp and update UI
         stamina = Mathf.Clamp(stamina, 0, maxStamina);
         staminaBar.value = stamina;
@@ -288,15 +316,41 @@ public class PlayerController : MonoBehaviour
             HitTarget(hit.point);
 
             if (hit.transform.TryGetComponent<Actor>(out Actor T))
-            { 
+            {
                 T.TakeDamage(attackDamage);
                 T.Hit();
+
+                if (hitEnemyClips.Length > 0)
+                {
+                    int index;
+                    do
+                    {
+                        index = Random.Range(0, hitEnemyClips.Length);
+                    } while (index == lastHitIndex && hitEnemyClips.Length > 1);
+
+                    lastHitIndex = index;
+                    audioSource.PlayOneShot(hitEnemyClips[index]);
+                }
+            }
+
+        }
+        else
+        {
+            if (missClips.Length > 0)
+            {
+                int index;
+                do
+                {
+                    index = Random.Range(0, missClips.Length);
+                } while (index == lastMissIndex && missClips.Length > 1);
+
+                lastMissIndex = index;
+                audioSource.PlayOneShot(missClips[index]);
             }
         }
     }
 
     //Hit effect instantiation (blood, sword hit, etc.)
-    
     void HitTarget(Vector3 pos)
     {
         //instantiates effect
@@ -349,6 +403,17 @@ public class PlayerController : MonoBehaviour
 
     public void SetHealth(float healthChange)
     {
+        if (healthChange < 0 && hurtClips.Length > 0)
+        {
+            int index;
+            do
+            {
+                index = Random.Range(0, hurtClips.Length);
+            } while (index == lastHurtIndex && hurtClips.Length > 1);
+
+            lastHurtIndex = index;
+            audioSource.PlayOneShot(hurtClips[index]);
+        }
         //changes the current health
         health += healthChange;
         //makes sure that the health change is legal (> 0 and < maxHealth)
@@ -361,5 +426,13 @@ public class PlayerController : MonoBehaviour
         {
             GC.GameOver();
         }
+    }
+
+    public void PlayFootstep()
+    {
+        if (footstepClips.Length == 0) return;
+
+        int index = Random.Range(0, footstepClips.Length);
+        audioSource.PlayOneShot(footstepClips[index]);
     }
 }

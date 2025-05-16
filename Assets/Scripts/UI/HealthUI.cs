@@ -21,7 +21,7 @@ public class HealthUI : MonoBehaviour
 
     public void Start()
     {
-        width = healthBar.sizeDelta.x;
+        originalWidth = healthBar.sizeDelta.x; 
         height = healthBar.sizeDelta.y;
 
         if (player.TryGetComponent<PlayerController>(out var pc))
@@ -41,22 +41,20 @@ public class HealthUI : MonoBehaviour
         if (health > maxHealth)
             health = maxHealth;
 
-        // Recalculate width
-        width = GetComponent<RectTransform>().sizeDelta.x;
-
         SetHealth(health); // Redraw
     }
 
-
     public void SetHealth(float healthParam)
     {
-        health = healthParam;
-        //changes the width of the health
-        float newWidth = (health / maxHealth) * width;
+        health = Mathf.Clamp(healthParam, 0, maxHealth);
 
-        //resizes the health bar based on the newWidth value
-        healthBar.sizeDelta = new Vector2 (newWidth, healthBar.sizeDelta.y);
-        //add the hp number
+        float normalizedHealth = health / maxHealth;
+        normalizedHealth = Mathf.Clamp01(normalizedHealth);
+
+        float newWidth = normalizedHealth * originalWidth;
+        healthBar.sizeDelta = new Vector2(newWidth, healthBar.sizeDelta.y);
+
         healthText.text = Mathf.RoundToInt(health).ToString();
     }
+
 }

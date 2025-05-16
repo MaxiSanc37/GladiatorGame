@@ -33,6 +33,9 @@ public class WaveSystem : MonoBehaviour
 
     public UpgradeManager upgradeManager;
 
+    public int finalWaveIndex = 5;
+    public GameObject victoryScreen;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -57,6 +60,14 @@ public class WaveSystem : MonoBehaviour
     private IEnumerator HandleEndOfWave()
     {
         yield return new WaitForSeconds(1f);
+
+        //Checks if it is the final wave
+        if (currentWave >= finalWaveIndex)
+        {
+            ShowVictoryScreen();
+            yield break;
+        }
+
         upgradeManager.ShowRandomUpgrades(3);
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
@@ -120,6 +131,13 @@ public class WaveSystem : MonoBehaviour
             //call the function again to find a valid spawn position
             return FindSpawnPos();
         }
+    }
+
+    private void ShowVictoryScreen()
+    {
+        Time.timeScale = 0f;
+        Cursor.lockState = CursorLockMode.None;
+        victoryScreen.SetActive(true);
     }
 
     public int GetCurrentWaveIndex()

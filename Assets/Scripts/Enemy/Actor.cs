@@ -83,6 +83,11 @@ public class Actor : MonoBehaviour
         {
             archerAI.CancelShot();
         }
+        else if (ai is EnemyAI meleeAI)
+        {
+            meleeAI.Hit();
+        }
+
 
         //mess with the second float to shorten the hit animation duration
         Invoke(nameof(ResetHit), 0.5f);

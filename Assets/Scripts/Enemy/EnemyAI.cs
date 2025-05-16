@@ -153,4 +153,22 @@ public class EnemyAI : MonoBehaviour, IEnemyAI
         //disables the weapon collider to walk
         weaponCollider.enabled = false;
     }
+
+    public void Hit()
+    {
+        if (agent.enabled)
+            agent.isStopped = true;
+
+        animator.SetTrigger("Hit");
+
+        StartCoroutine(RecoverFromHit());
+    }
+
+    private IEnumerator RecoverFromHit()
+    {
+        yield return new WaitForSeconds(0.4f); // Hit animation duration
+        if (agent.enabled)
+            agent.isStopped = false;
+    }
+
 }

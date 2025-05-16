@@ -11,6 +11,11 @@ public class UpgradeManager : MonoBehaviour
     public PlayerController player;
     public GameObject notEnoughCoinsText;
 
+    [Header("Audio")]
+    public AudioSource audioSource;
+    public AudioClip coinSound;
+    public AudioClip diceSound;
+
     public void ShowRandomUpgrades(int count)
     {
         upgradePanel.SetActive(true);
@@ -64,7 +69,19 @@ public class UpgradeManager : MonoBehaviour
 
         player.coins -= 30;
         player.UpdateCoinsUI();
+        PlayDiceSound(); // Re-roll sound
         ShowRandomUpgrades(3); // Re-rolls upgrades!
     }
 
+    public void PlayCoinSound()
+    {
+        if (coinSound != null)
+            audioSource.PlayOneShot(coinSound);
+    }
+
+    public void PlayDiceSound()
+    {
+        if (diceSound != null)
+            audioSource.PlayOneShot(diceSound);
+    }
 }
