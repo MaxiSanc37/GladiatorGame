@@ -12,6 +12,7 @@ TagManager:
   - Water
   - UI
   - 
+  - Hittable
   - 
   - 
   - 
@@ -24,10 +25,9 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
-  - 
-  - 
+  - Ground
+  - Player
+  - Props
   - 
   - 
   - 
